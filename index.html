@@ -1,0 +1,94 @@
+<html>
+    <head>
+        <title>camlive diogo</title>
+    </head>
+
+    <body>
+        <button id="start-camera" hidden>Start Camera</button>
+        <h2>Live</h2>
+        <video id="video" width="320" height="240" autoplay></video>
+        <button id="start-record" hidden>Start Recording</button>
+        <button id="stop-record" hidden>Stop Recording</button>
+        <button id="get-last-seconds">Capturar últimos momentos</button>
+        <a id="download-video" download="test.webm" hidden>Download Video</a>
+        <h3>Último lance</h3>
+        <video id="recorded" width="320" height="240" autoplay controls title="Vídeo capturado"></video>
+    </body>
+    <script>
+        let camera_button = document.querySelector("#start-camera");
+        let video = document.querySelector("#video");
+        let recorded_video = document.querySelector("#recorded");
+        let start_button = document.querySelector("#start-record");
+        let stop_button = document.querySelector("#stop-record");
+        let download_link = document.querySelector("#download-video");
+        let cut_video = document.querySelector("#get-last-seconds");
+
+        let camera_stream = null;
+        let media_recorder = null;
+        let blobs_recorded = [];
+        let actualBlob = null;
+
+        const seconds = 11; // sempre mais 1s do que o desejado
+
+        camera_button.addEventListener('click', async function() {
+             await navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(function(stream) {
+                camera_stream = stream;
+                video.srcObject = camera_stream;
+                record();
+            }, function(err) {
+                console.log(err);
+                alert('Você precisa permitir a utilização da câmera');
+            });
+        });
+
+        start_button.addEventListener('click', function() {
+            // set MIME type of recording as video/webm
+            media_recorder = new MediaRecorder(camera_stream, { mimeType: 'video/webm' });
+
+            // event : new recorded video blob available 
+            media_recorder.addEventListener('dataavailable', function(e) {
+                blobs_recorded.push(e.data);
+            });
+
+            // event : recording stopped & all blobs sent
+            media_recorder.addEventListener('stop', function() {
+                // create local object URL from the recorded video blobs
+                // console.log(blobs_recorded, blobs_recorded.slice(-seconds));
+                let blobsNow = blobs_recorded;
+                blobs_recorded = []; // cleaning memory app
+                let video_local = URL.createObjectURL(new Blob(blobsNow, { type: 'video/webm' }));
+                // download_link.href = video_local;
+                actualBlob = URL.createObjectURL(new Blob(blobsNow.slice(-seconds), { type: 'video/webm' }));
+            });
+
+            // start recording with each recorded blob having 1 second video
+            media_recorder.start(1000);
+        });
+
+        stop_button.addEventListener('click', function() {
+            media_recorder.stop();
+        });
+
+        cut_video.addEventListener('click', function() {
+            if (actualBlob === null) {
+                alert(`Aguarde os primeiros ${seconds} segundos`);
+            } else {
+                recorded_video.src = actualBlob;
+            }
+        });
+
+        function updateInterval () {
+            setTimeout(function() {
+                stop_button.click();
+                record();
+            }, seconds * 1000);
+        }
+
+        camera_button.click();
+
+        function record() {
+            updateInterval();
+            start_button.click();
+        }
+    </script>
+</html>
