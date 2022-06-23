@@ -12,30 +12,32 @@
         <button id="stop-record" hidden>Stop Recording</button>
         <a id="download-video" download="test.webm" hidden>Download Video</a>
         <!-- end hidden buttons -->
-        <div class="container-fluid p-0">
-            <div class="col-12" style="background-color: #f2f2f2;">
-                <div class="row pt-3 pb-3">
-                    <div class="col-12 text-center">
-                        <h2>Live</h2>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-6" style="background-color: #f2f2f2;">
+                    <div class="row pt-3 pb-3">
+                        <div class="col-12 text-center">
+                            <h2>Live</h2>
+                        </div>
+                    </div>
+                    <div class="row d-flex justify-content-center">
+                        <video id="video" class="w-75" autoplay></video>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-center pt-5 pb-5">
+                            <button id="get-last-seconds" class="btn btn-success">Capturar últimos momentos</button>
+                        </div>
                     </div>
                 </div>
-                <div class="row d-flex justify-content-center">
-                    <video id="video" class="w-75" autoplay></video>
-                </div>
-                <div class="row">
-                    <div class="col-12 text-center pt-5 pb-5">
-                        <button id="get-last-seconds" class="btn btn-success">Capturar últimos momentos</button>
+                <div class="col-12 col-lg-6 pb-5">
+                    <div class="row pt-3 pb-3">
+                        <div class="col-12 text-center">
+                            <h3>Último lance</h3>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-12 pb-5">
-                <div class="row pt-3 pb-3">
-                    <div class="col-12 text-center">
-                        <h3>Último lance</h3>
+                    <div class="row d-flex justify-content-center">
+                        <video id="recorded" class="w-75" autoplay controls title="Vídeo capturado"></video>
                     </div>
-                </div>
-                <div class="row d-flex justify-content-center">
-                    <video id="recorded" class="w-75" autoplay controls title="Vídeo capturado"></video>
                 </div>
             </div>
         </div>
@@ -54,7 +56,7 @@
         let blobs_recorded = [];
         let actualBlob = null;
 
-        const seconds = 11; // sempre mais 1s do que o desejado
+        const seconds = 21; // sempre mais 1s do que o desejado
 
         camera_button.addEventListener('click', async function() {
              await navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(function(stream) {
@@ -97,7 +99,7 @@
 
         cut_video.addEventListener('click', function() {
             if (actualBlob === null) {
-                alert(`Aguarde os primeiros ${seconds} segundos`);
+                alert(`Aguarde os primeiros ${(seconds-1)} segundos`);
             } else {
                 recorded_video.src = actualBlob;
             }
